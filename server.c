@@ -276,88 +276,105 @@ int main(int argc, char *argv[])
         {
         	switch (buffer[0])
         	{
-                	case 'C':
-                        	sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
-                        	printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
+				case 'C':
+					sscanf(buffer,"%c %s %d %s", &com, clientIpAddress, &clientPort, clientName);
+					printf("COM=%c ipAddress=%s port=%d name=%s\n",com, clientIpAddress, clientPort, clientName);
 
-                        	// fsmServer==0 alors j'attends les connexions de tous les joueurs
-                                strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
-                                tcpClients[nbClients].port=clientPort;
-                                strcpy(tcpClients[nbClients].name,clientName);
-                                nbClients++;
+					// fsmServer==0 alors j'attends les connexions de tous les joueurs
+						strcpy(tcpClients[nbClients].ipAddress,clientIpAddress);
+						tcpClients[nbClients].port=clientPort;
+						strcpy(tcpClients[nbClients].name,clientName);
+						nbClients++;
 
-                                printClients();
+						printClients();
 
 				// rechercher l'id du joueur qui vient de se connecter
 
-                                id=findClientByName(clientName);
-                                printf("id=%d\n",id);
+						id=findClientByName(clientName);
+						printf("id=%d\n",id);
 
 				// lui envoyer un message personnel pour lui communiquer son id
 
-                                sprintf(reply,"I %d",id);
-                                sendMessageToClient(tcpClients[id].ipAddress,
+						sprintf(reply,"I %d",id);
+						sendMessageToClient(tcpClients[id].ipAddress,
                                        tcpClients[id].port,
                                        reply);
 
 				// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
 				// connectes
 
-                                sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
-                                broadcastMessage(reply);
+					sprintf(reply,"L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
+					broadcastMessage(reply);
+
 
 				// Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
-
-                                if (nbClients==4)
+				if (nbClients==4)
 				{
+					
+					
 					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 					// RAJOUTER DU CODE ICI
+										
+					sprintf(reply, "D %d %d %d", deck[0], deck[1], deck[2]);         					//type D pour distribution + on ecrit dans le buffer les 3 cartes du joueur 2 : deck[0], deck[1], deck[2]
+					sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);       		//tcpClients[0] = joueur 0. on transmet son IP, son port
+
+					for (int j = 0; j < 8; j++)															//boucle d'envoi des valeurs visibles (type V)
+					{
+						sprintf(reply, "V 0 %d %d", j, tableCartes[0][j]);								//symboles visibles par le joueur 0
+						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);     	//tcpClients[0] = joueur 0. on transmet son IP, son port
+					}
+
+
+
+
 
 					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
 					// RAJOUTER DU CODE ICI
 
-					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
-					// RAJOUTER DU CODE ICI
-
-					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
-					// RAJOUTER DU CODE ICI
-
-					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
-					// RAJOUTER DU CODE ICI
+					sprintf(reply, "D %d %d %d", deck[3], deck[4], deck[5]); 							//type D pour distribution + on ecrit dans le buffer les 3 cartes du joueur 2 : deck[3], deck[4], deck[5]
+					sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);            //tcpClients[1] = joueur 1. on transmet son IP, son port
 					
-					sprintf(reply, "D %d %d %d", deck[0], deck[1], deck[2]);
-					sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
-					for (int j = 0; j < 8; j++) {
-						sprintf(reply, "V 0 %d %d", j, tableCartes[0][j]);
-						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
+					
+					for (int j = 0; j < 8; j++)															//boucle d'envoi des valeurs visibles (type V)
+					{
+						sprintf(reply, "V 1 %d %d", j, tableCartes[1][j]);								//symboles visibles par le joueur 1
+						sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);        //tcpClients[1] = joueur 1. on transmet son IP, son port
 					}
 
-					// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
-					// RAJOUTER DU CODE ICI
-					sprintf(reply, "D %d %d %d", deck[3], deck[4], deck[5]);
-					sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
-					for (int j = 0; j < 8; j++) {
-						sprintf(reply, "V 1 %d %d", j, tableCartes[1][j]);
-						sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
-					}
+
+
+					
 
 					// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
 					// RAJOUTER DU CODE ICI
-					sprintf(reply, "D %d %d %d", deck[6], deck[7], deck[8]);
-					sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
-					for (int j = 0; j < 8; j++) {
-						sprintf(reply, "V 2 %d %d", j, tableCartes[2][j]);
-						sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
+					sprintf(reply, "D %d %d %d", deck[6], deck[7], deck[8]);							//type D pour distribution + on ecrit dans le buffer les 3 cartes du joueur 2 : deck[6], deck[7], deck[8]
+					sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);			 //tcpClients[2] = joueur 2. on transmet son IP, son port
+					
+					
+					for (int j = 0; j < 8; j++)																//boucle d'envoi des valeurs visibles (type V)
+					{
+						sprintf(reply, "V 2 %d %d", j, tableCartes[2][j]);									//symboles visibles par le joueur 2
+						sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);		 //tcpClients[2] = joueur 2. on transmet son IP, son port
 					}
+
+
+
+
 
 					// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
 					// RAJOUTER DU CODE ICI
-					sprintf(reply, "D %d %d %d", deck[9], deck[10], deck[11]);
-					sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
-					for (int j = 0; j < 8; j++) {
-						sprintf(reply, "V 3 %d %d", j, tableCartes[3][j]);
-						sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
+					sprintf(reply, "D %d %d %d", deck[9], deck[10], deck[11]);							//type D pour distribution
+					sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);			 //tcpClients[3] = joueur 3. on transmet son IP, son port
+					
+					
+					for (int j = 0; j < 8; j++)																//boucle d'envoi des valeurs visibles (type V)
+					{
+						sprintf(reply, "V 3 %d %d", j, tableCartes[3][j]);										//symboles visibles par le joueur 3
+						sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);			 //tcpClients[3] = joueur 3. on transmet son IP, son port
 					}
+
+
+
 
 					// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
 					// RAJOUTER DU CODE ICI
@@ -366,7 +383,7 @@ int main(int argc, char *argv[])
 
 
 
-					//fsmServer=1;
+					fsmServer=1;
 				}
 				break;
                 }

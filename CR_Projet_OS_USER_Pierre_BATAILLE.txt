@@ -1,0 +1,177 @@
+Rapport de projet - OS USER : Sherlock 13 en réseau local (TCP/client/server)
+@Author: Pierre BATAILLE
+
+________________________________________
+1. Introduction
+Pour ce projet OS USER, j'ai participé au codage d'un jeu de déduction en réseau qui s'inspire du jeu Sherlock 13. 
+Le but était de développer un jeu multijoueur jouable en local grâce au protocole TCP, et de créer une interface graphique sympa avec SDL2. 
+Les 4 joueurs représentés par des clients doivent collaborer et échanger des indices pour identifier un coupable parmi 13 personnages (representé par 13 cartes). 
+Ce projet m'a permis de reprendre mes bases de programmation reseau en C, la gestion des threads, et la manipulation de l'affichage graphique avec SDL (que je ne connaissais pas avant).
+Je n'ai pas écrit tout le code source de ce projet: on nous avait déja fourni la structure principales des fichiers et des fonctions. 
+J'ai juste du compléter certaines parties clées du code pour que le jeu fonctionne:
+Voici le résumé en 2 lignes des parties à compléter :
+
+•	Dans server.c : il faut envoyer à chaque joueur ses 3 cartes (D) et sa ligne dans tableCartes (V), puis informer tout le monde du joueur courant (M).
+•	Dans sh13.c : il faut gérer les messages reçus (I, L, D, M, V) pour mettre à jour l'interface et les données locales, et envoyer les actions (G, O, S) au serveur.
+
+
+____________________________________
+2. Règles du jeu Sherlock 13 
+
+Rappel des règles du jeu
+
+•	Le jeu comprend 13 cartes représentant des suspects, tels que "Sherlock Holmes" ou "Irene Adler".
+•	Chaque carte de suspect est associée à un ensemble de symboles distincts (par exemple, une pipe, un carnet, un œil, etc.).
+•	Au début de la partie, chacun des 4 joueur reçoit trois cartes. L'une de ces cartes est mise de côté et constitue le coupable (la 13e).
+•	Les symboles présents sur les cartes de chaque joueur sont visibles uniquement par ce joueur.
+•	L'objectif pour les joueurs est de déduire quelle carte est le coupable, c'est-à-dire la carte qui n'a été distribuée à aucun joueur.
+
+Pendant leur tour, les joueurs peuvent :
+1.	Demander combien de fois un symbole apparaît chez les autres joueurs.
+2.	Demander à un joueur s'il a un symbole spécifique.
+3.	Accuser directement un personnage. Si c'est correct : on gagne. Sinon, vous ne pouvez plus jouer, mais vous répondez encore aux questions.
+Le but est d'utiliser ces informations pour déduire qui est le coupable.
+
+
+
+________________________________________
+
+3. Architecture du projet (vue générale)
+________________________________________
+
+
+Le projet est divisé en deux programmes principaaux le fichier server.c et le fichier sh13.c.
+Ces deux programmrs font appel à des fichiers de bibliothèques SDL2 et socket TCP, et font appel aux images présentes dans le répertoire du jeu, ainsi que le connect button...
+Voici le fonctionnement sommaire des deux fichiers.c:
+
+a) Le serveur (server.c)
+•	Mélange les cartes
+•	Attend que 4 joueurs se connectent.
+•	distribue 3 cartes à chaque joueur.
+•	Calcule les symboles possedés par chaque joueur et les envoie.
+•	Gère le tour à tour (joueur courant, questions posées, réponses, accusations).
+•	Envoie des messages aux joueurs pour mettre à jour l'état du jeu.
+
+b) Le client (sh13.c)
+•	Affiche l'interface du jeu avec SDL2 (cartes, boutons, suspects, objets).
+•	Chaque joueur peut cliquer pour poser une question ou accuser.
+•	Reçoit les messages du serveur dans un thread à part.
+•	Met à jour l'affichage en fonction des messages reçus (cartes, noms, joueur courant, etc). 
+
+
+
+
+________________________________________
+
+4. Compilation et exécution
+________________________________________
+
+
+Pour savoir comment compiler les deuc fichiers.c, vous pouvez regarder dans le readme.md, ou sinon les commandes sont lessuivantes:
+
+gcc server.c -o server
+gcc -o sh13 sh13.c `sdl2-config --cflags --libs` -lSDL2_image -lSDL2_ttf -lpthrea
+
+
+Ou bien, plus simple, on peut utiliser directement le cmd.sh dans lequel sont deja mises ces 2 commandes de compilation.
+Sous linux, on peut donc executer le cmd.sh de la manière suivante pour compiler les 2 fichiers:
+
+chmod +x cmd.sh
+
+
+Pour executer le jeu: on commence par lancer le server: ./server 8000.
+une fois que le server est lancé, le deck de carte est melangé par le code:
+
+melangerDeck(); cette fonction fait reference à la fonction dans le code qui melange le deck en chengeant de paires de cartes aléatoriement:
+
+index1=rand()%13;
+index2=rand()%13;
+tmp=deck[index1];
+deck[index1]=deck[index2];
+deck[index2]=tmp;
+
+
+
+Puis on lance Chaque client avec sa propre adresse locale et un port unique :
+./sh13 127.0.0.1 8000 127.0.0.1 5677 Pierre
+./sh13 127.0.0.1 8000 127.0.0.1 5678 Marie
+./sh13 127.0.0.1 8000 127.0.0.1 5679 Leon
+./sh13 127.0.0.1 8000 127.0.0.1 5680 Jean
+
+
+ca veut dire je suis Pierre: je me connecte au serveur en local à l'adresse 127.0.0.1 sur le port 8000, et j'écoute les réponses sur le port 5677. 
+ca veut dire je suis Marie: je me connecte au serveur en local à l'adresse 127.0.0.1 sur le port 8000, et j'écoute les réponses sur le port 5678. 
+ca veut dire je suis Leon: je me connecte au serveur en local à l'adresse 127.0.0.1 sur le port 8000, et j'écoute les réponses sur le port 5679. 
+ca veut dire je suis Jean: je me connecte au serveur en local à l'adresse 127.0.0.1 sur le port 8000, et j'écoute les réponses sur le port 5680.
+
+
+
+________________________________________
+
+5. Fonctionnement du jeu (étapes détaillées )
+________________________________________
+
+
+Une fois que chaque client est lancé après l'execution du server, une fenètre s'ouvre avec un interface: i faut cliquer sur connect pour que le client se connecte au jeu.
+concretement quand on clique sur connect, cela correspond à :
+if ((mx<200) && (my<50) && (connectEnabled==1))
+Puis un message de type C indique qu'un client veut se connecterau server, et contient son IP, son port d ecoute, et son nom.
+Puis la focntion est appelée: sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
+
+
+
+Une fois 4 joueurs connectés (if (nbClients == 4)) dans le code, le serveur :
+
+•	Distribue 3 cartes à chaque joueur (la carte qui reste est le coupable). le code est le suivant pour le joueur 0 (indice de table 0):
+
+    sprintf(reply, "D %d %d %d", deck[0], deck[1], deck[2]);         					                //type D pour distribution + on ecrit dans le buffer les 3 cartes du joueur 2 : deck[0], deck[1], deck[2]
+					sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);       		//tcpClients[0] = joueur 0. on transmet son IP, son port
+
+					for (int j = 0; j < 8; j++)															//boucle d'envoi des valeurs visibles (type V)
+					{
+						sprintf(reply, "V 0 %d %d", j, tableCartes[0][j]);								//symboles visibles par le joueur 0
+						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);     	//tcpClients[0] = joueur 0. on transmet son IP, son port
+					}
+
+
+•	Remplit une table de symboles (tableCartes[i][j]) indiquant les symboles j visibles par joueur i.
+•	Envoie à chaque joueur ses cartes et ses symboles visibles.
+
+À chaque tour, un joueur peut :
+•	Poser une question générale sur un symbole (O): case 'O':
+    le joueur demande combien de fois un symbole est présent chez les autres joueurs
+    Le serveur fait la somme sur les tableCartes[i][objet] des autres joueurs, er renvoie la somme au joueur
+
+    
+•	Poser une question ciblée à un joueur (S): case 'S':
+    Le joueur demande est-ce quun joueur possède au moins un symbole 
+    Le serveur renvoie 1 si le joueur possède au moins un symbole, 0 sinon.
+
+
+
+•	Accuser un suspect (G): case 'G':
+    Le joueur envoie  G <idJoueur> <carte>
+    Le serveur compare avec deck[12] (le coupable).
+    Si c’est bon, il envoie W <id> pour déclarer le vainqueur.
+
+Et ainsi de suite: les joueurs peuvent poser des questions, accuser un suspect, etc.
+cela revient à une session de questions réponses entre le serveur et les clients :=)
+
+
+
+
+
+
+
+
+________________________________________
+
+6. Complétion du code expliquée
+________________________________________
+
+
+
+
+
+
+

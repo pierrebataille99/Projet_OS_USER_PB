@@ -350,6 +350,27 @@ int main(int argc, char ** argv)
 				}
 
 				break;
+
+
+			
+//
+				case 'R':
+				{
+					int resultat;
+					sscanf(gbuffer, "R %d", &resultat);
+					printf("Réponse du serveur : %d\n", resultat);
+
+					// Popup simple (temporaire)
+					char msg[64];
+					sprintf(msg, "Symbole trouvé %d fois chez les autres", resultat);
+					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Réponse", msg, NULL);
+
+					break;
+				}
+
+
+
+			
 		}
 		synchro=0;
         }
