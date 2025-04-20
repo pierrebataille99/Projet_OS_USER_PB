@@ -240,6 +240,7 @@ int main(int argc, char ** argv)
 					sprintf(sendBuffer,"C %s %d %s",gClientIpAddress,gClientPort,gName);
 
 					// RAJOUTER DU CODE ICI
+					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					connectEnabled=0;
@@ -273,6 +274,7 @@ int main(int argc, char ** argv)
 						sprintf(sendBuffer,"G %d %d",gId, guiltSel);
 
 					// RAJOUTER DU CODE ICI 
+					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					}
@@ -281,6 +283,7 @@ int main(int argc, char ** argv)
 						sprintf(sendBuffer,"O %d %d",gId, objetSel);
 
 					// RAJOUTER DU CODE ICI
+					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					}
@@ -289,6 +292,7 @@ int main(int argc, char ** argv)
 						sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
 
 					// RAJOUTER DU CODE ICI
+					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					}
@@ -344,29 +348,62 @@ int main(int argc, char ** argv)
 			case 'V':
 				// RAJOUTER DU CODE ICI
 				{
-					int i, j, v;
-					sscanf(gbuffer, "V %d %d %d", &i, &j, &v);
-					tableCartes[i][j] = v;
+					int row = 0, col = 0, n = -1;
+					sscanf(gbuffer, "V %d %d %d", &row, &col, &n);
+					if (n == 100 && tableCartes[row][col] < 0)
+						tableCartes[row][col] = n;
+					else
+						tableCartes[row][col] = n;
 				}
 
 				break;
 
+			case 'W':
+				{
+					int winner;
+					sscanf(gbuffer, "W %d", &winner);
+
+					// Nom du coupable (toujours l'indice 12 dans deck[])
+					const char *coupable = nbnoms[12];
+
+					char msg[128];
+					sprintf(msg,
+						"Le coupable est %s\n"
+						"Le joueur %s a gagné la partie !",
+						coupable,
+						gNames[winner]
+					);
+
+					SDL_ShowSimpleMessageBox(
+						SDL_MESSAGEBOX_INFORMATION,
+						"Fin de la partie",
+						msg,
+						NULL
+					);
+
+					//bouton du jeu desactivé si coupable trouvé
+					goEnabled = 0;
+					break;
+				}
+
+
+
 
 			
 //
-				case 'R':
-				{
-					int resultat;
-					sscanf(gbuffer, "R %d", &resultat);
-					printf("Réponse du serveur : %d\n", resultat);
+				// case 'R':
+				// {
+				// 	int resultat;
+				// 	sscanf(gbuffer, "R %d", &resultat);
+				// 	printf("Réponse du serveur : %d\n", resultat);
 
-					// Popup simple (temporaire)
-					char msg[64];
-					sprintf(msg, "Symbole trouvé %d fois chez les autres", resultat);
-					SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Réponse", msg, NULL);
+				// 	// Popup simple (temporaire)
+				// 	char msg[64];
+				// 	sprintf(msg, "Symbole trouvé %d fois chez les autres", resultat);
+				// 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Réponse", msg, NULL);
 
-					break;
-				}
+				// 	break;
+				// }
 
 
 

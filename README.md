@@ -45,3 +45,10 @@ Il faut cliquer sur connect
 Sur chaque fenêtre les cartes sont distribuées aléatoirement pour les joeurs
 
 
+
+Let's Go ! Amusez-vous bien et profitez du jeu !
+:=)
+
+
+
+
