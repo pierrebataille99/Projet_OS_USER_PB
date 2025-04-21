@@ -179,12 +179,114 @@ La partie server.c:
 
 
 
+------------------------------------ le case 'O' -----------------------------------------------------------
+case 'O':
+{
+	int senderId, symbole;
+	sscanf(buffer, "O %d %d", &senderId, &symbole);
+
+	for (int i = 0; i < 4; i++) {
+		if (i == joueurCourant) continue;
+		int presence = (tableCartes[i][symbole] > 0) ? 100 : 0;
+		sprintf(reply, "V %d %d %d", i, symbole, presence);
+		broadcastMessage(reply);
+	}
+
+	joueurCourant = (joueurCourant + 1) % 4;
+	sprintf(reply, "M %d", joueurCourant);
+	broadcastMessage(reply);
+	break;
+}
+
+
+Dans ce bloc, quand un joueur pose une question sur un symbole (ex: la loupe), le serveur va demander aux 3 autres joueurs s’ils possèdent ce symbole. Pour chaque joueur (sauf celui qui pose la question), s’il possède ce symbole, on envoie une réponse avec 100 (pour l’afficher avec une étoile sur la grille), sinon on envoie 0. Ensuite on passe au joueur suivant en envoyant un message "M" à tous.
+J’ai utilisé tableCartes[i][symbole] > 0 pour savoir si un joueur a ce symbole, et broadcastMessage pour que tout le monde voit la réponse.
+
+
+
+
+
+------------------------------------ le case 'G' -----------------------------------------------------------
+case 'G':
+{
+	int senderId, guess;
+	sscanf(buffer, "G %d %d", &senderId, &guess);
+
+	if (guess == deck[12]) {
+		sprintf(reply, "W %d", joueurCourant);
+		broadcastMessage(reply);
+		fsmServer = 0;
+	} else {
+		joueurCourant = (joueurCourant + 1) % 4;
+		sprintf(reply, "M %d", joueurCourant);
+		broadcastMessage(reply);
+	}
+	break;
+}
+
+
+
+
+Ici, le joueur tente une accusation directe. On récupère la carte qu’il accuse (guess) et on la compare avec la carte coupable (toujours stockée à deck[12]).
+Si c’est la bonne, on envoie un message W à tout le monde pour annoncer la victoire, et on arrête la partie (fsmServer = 0). Sinon, la partie continue avec le joueur suivant.
+J’ai fait en sorte que le message "M" soit toujours envoyé pour garder le tour bien à jour.
 
 
 
 
 
 
+------------------------------------ le case 'S' -----------------------------------------------------------
+case 'S':
+{
+	int senderId, cible, symbole;
+	sscanf(buffer, "S %d %d %d", &senderId, &cible, &symbole);
+
+	int quantite = tableCartes[cible][symbole];
+
+	sprintf(reply, "V %d %d %d", cible, symbole, quantite);
+	sendMessageToClient(tcpClients[senderId].ipAddress, tcpClients[senderId].port, reply);
+
+	joueurCourant = (joueurCourant + 1) % 4;
+	sprintf(reply, "M %d", joueurCourant);
+	broadcastMessage(reply);
+	break;
+}
+
+
+
+
+
+Ici, un joueur demande à un autre joueur spécifique combien de fois il a un symbole précis (ex: “est-ce que le joueur 2 a des carnets ?”). Le serveur lit la requête et renvoie directement au demandeur un message "V" avec le résultat. Les autres joueurs ne voient pas cette info (c’est secret). Puis comme d’hab, on passe au joueur suivant avec "M".
+
+
+
+
+
+
+------------------------------------ distribution des cartes aus joueurs -----------------------------------------------------------
+Cette partie du code a été expliquée un peu plus haut dans le focntionnement du programme
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+La partie sh13.c:
 
 
 
