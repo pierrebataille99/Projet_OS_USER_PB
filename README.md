@@ -10,17 +10,17 @@ Il faut ensuite compiler les programmes en c pour créer des éxecutables:
 
 
 
+
+
 __Compilation:__
 
-
-
-Pour compiler directement et créer les executables en 2 commandes avec le "makefile: cmd.sh", il faut utiliser les commandes suivantes:
+Pour compiler directement et créer les executables en 2 commandes avec le cmd.sh, il faut utiliser les commandes suivantes:
 
 `chmod +x cmd.sh`
 Puis:
 `./cmd.sh`
 
-et `chmod +x launch_clients.sh` (c'est le makefile qui va lancer les 4 clients d'un coup)
+et `chmod +x launch_clients.sh` (c'est le "makefile" qui va servir à lancer les 4 clients d'un coup)
 
 
 
@@ -36,11 +36,12 @@ Par exemple, pour compiler le server.c:
 `gcc server.c -o server`
 
 
-
-
 Par exemple, pour compiler le server.c:
 
 `gcc -o sh13 sh13.c sdl2-config --cflags --libs -lSDL2_image -lSDL2_ttf -lpthread`
+
+
+
 
 
 

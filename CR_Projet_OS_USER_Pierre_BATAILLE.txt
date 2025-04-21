@@ -6,7 +6,10 @@ Ce travail m'a pris 16heures du Weekend de Pâcques passé en famille ^^
 
 
 ________________________________________
+
 1. Introduction
+____________________________________
+
 
 Pour ce projet OS USER, on devait coder un jeu de déduction en réseau inspiré de Sherlock 13, mais version multijoueur local via TCP. L’idée, c’était que 4 joueurs puissent se connecter, poser des questions, faire des déductions et accuser un coupable parmi 13 personnages, avec une vraie interface graphique gérée avec SDL2.
 Heureusement, on ne partait pas de zéro. Le code était déjà partiellement écrit, avec une base serveur (server.c) et un client SDL (sh13.c). Mais pas mal de blocs étaient laissés vides avec des // RAJOUTER DU CODE ICI. C’était à nous de compléter la logique réseau et jeu pour que tout fonctionne.
@@ -31,7 +34,10 @@ Ce projet m’a permis de bien revoir pas mal de choses qu’on avait vues en TP
 
 
 ____________________________________
+
 2. Règles du jeu Sherlock 13 
+____________________________________
+
 
 Rappel des règles du jeu
 
@@ -85,23 +91,17 @@ ________________________________________
 ________________________________________
 
 
-Pour savoir comment compiler les deuc fichiers.c, vous pouvez regarder dans le readme.md, ou sinon les commandes sont lessuivantes:
-
-Sous linux, on peut donc executer le cmd.sh de la manière suivante pour compiler les 2 fichiers:
+Pour savoir comment compiler les deuc fichiers.c et le makefile (launch_clients.sh), vous pouvez regarder dans le readme.md, ou sinon les commandes sont lessuivantes:
 
 chmod +x cmd.sh
-Puis:
 ./cmd.sh
+chmod +x launch_clients.sh
 
 
-Ou bien si on aime se compliquer la vie:
-gcc server.c -o server
-gcc -o sh13 sh13.c `sdl2-config --cflags --libs` -lSDL2_image -lSDL2_ttf -lpthread
+Puis on lance le server:
+./server 8000
 
 
-
-
-Pour executer le jeu: on commence par lancer le server: ./server 8000.
 une fois que le server est lancé, le deck de carte est melangé par le code:
 
 melangerDeck(); cette fonction fait reference à la fonction dans le code qui melange le deck en chengeant de paires de cartes aléatoriement:
@@ -114,7 +114,10 @@ deck[index2]=tmp;
 
 
 
-Puis on lance Chaque client avec sa propre adresse locale et un port unique :
+On lance ensuite les 4 clients avec
+./launch_clients.sh
+
+ce qui revient à lancer chaque client avec sa propre adresse locale et un port unique :
 ./sh13 127.0.0.1 8000 127.0.0.1 5677 Pierre
 ./sh13 127.0.0.1 8000 127.0.0.1 5678 Marie
 ./sh13 127.0.0.1 8000 127.0.0.1 5679 Leon
