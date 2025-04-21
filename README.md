@@ -8,6 +8,8 @@ Pour compiler et executer le jeu, vous devez suivre les étapes suivantes:
 Pour commencer, il faut cloner ce repository sur votre ordinateur, et se placer dans le dossier du projet sur le terminal
 Il faut ensuite compiler les programmes en c pour créer des éxecutables:
 
+
+
 __Compilation:__
 
 
@@ -18,7 +20,17 @@ Pour compiler directement et créer les executables en 2 commandes avec le "make
 Puis:
 `./cmd.sh`
 
-Ou bien si on veut se compliquer la vie, on peut compiler les 2 programmes un par un:
+et `chmod +x launch_clients.sh` (c'est le makefile qui va lancer les 4 clients d'un coup)
+
+
+
+
+
+
+
+Autre méthode vétuste:
+
+si on veut se compliquer la vie, on peut compiler les 2 programmes un par un:
 Par exemple, pour compiler le server.c:
 
 `gcc server.c -o server`
@@ -39,8 +51,18 @@ Il faut ensuite commencer par lancer le serveur sur un port (j'ai décidé de pr
 `./server 8000`
 
 
+Puis pour lancer les 4 clients d'un coup:
 
-Puis il faut lancer 4 terminaux différents en local (127.0.0.1) pour créer 4 clients différents qui vont se connecter au serveur au port 8000, et ecouter chacun sur un port qui lui est propre (5677, 5678, 5679, 25680). :
+`./launch_clients.sh`
+Il faut cliquer sur connect de chacune des 4 fenetre de jeu.
+
+
+
+
+
+Autre méthode vétuste pour ouvrir chaque client dans un terminal différent:
+
+on lancer 4 terminaux différents en local (127.0.0.1) pour créer 4 clients différents qui vont se connecter au serveur au port 8000, et ecouter chacun sur un port qui lui est propre (5677, 5678, 5679, 25680). :
 
 `./sh13 127.0.0.1 8000 127.0.0.1 5677 Pierre`
 
