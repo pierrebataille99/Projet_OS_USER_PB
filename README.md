@@ -58,6 +58,8 @@ Puis pour lancer les 4 clients d'un coup:
 Il faut cliquer sur connect de chacune des 4 fenetre de jeu.
 
 
+J'ai decidé de ne pas lancer le serveur dans le fichier launch_clients.sh pour une raison:
+je voulais voir les messages dans un terminal à part pour le serveur pour debug, et non pas dans le le terminal des clients :)
 
 
 
