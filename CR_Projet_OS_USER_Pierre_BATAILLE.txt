@@ -152,7 +152,10 @@ Une fois 4 joueurs connectés (if (nbClients == 4)) dans le code, le serveur :
 •	Accuser un suspect (G): case 'G':
     Le joueur envoie  G <idJoueur> <carte>
     Le serveur compare avec deck[12] (le coupable).
-    Si c’est bon, il envoie W <id> pour déclarer le vainqueur.
+    Si c’est bon, il envoie W <id> pour déclarer le vainqueur et fenetre popup (case W ajouté dans le sh13).
+
+    exemple coté serveur: Data: [G 2 7]: signifie que le joueur 2 a fait une action type accusation et trouvé le coupable qui est le 7
+    exemple coté client: consomme |W 2 : signifie que le joueur 2 a trouvé le coupable
 
 Et ainsi de suite: les joueurs peuvent poser des questions, accuser un suspect, etc.
 cela revient à une session de questions réponses entre le serveur et les clients :=)
@@ -192,9 +195,3 @@ La partie server.c:
 
 
 
-
-
-consomme |W 2
-
-Data: [G 2 7
-]
