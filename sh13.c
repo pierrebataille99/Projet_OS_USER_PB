@@ -363,14 +363,13 @@ int main(int argc, char ** argv)
 					int winner;
 					sscanf(gbuffer, "W %d", &winner);
 
-					// Nom du coupable (toujours l'indice 12 dans deck[])
-					const char *coupable = nbnoms[12];
+					
 
 					char msg[128];
 					sprintf(msg,
-						"Le coupable est %s\n"
+						
 						"Le joueur %s a gagné la partie !",
-						coupable,
+						
 						gNames[winner]
 					);
 
@@ -390,23 +389,6 @@ int main(int argc, char ** argv)
 
 
 			
-//
-				// case 'R':
-				// {
-				// 	int resultat;
-				// 	sscanf(gbuffer, "R %d", &resultat);
-				// 	printf("Réponse du serveur : %d\n", resultat);
-
-				// 	// Popup simple (temporaire)
-				// 	char msg[64];
-				// 	sprintf(msg, "Symbole trouvé %d fois chez les autres", resultat);
-				// 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Réponse", msg, NULL);
-
-				// 	break;
-				// }
-
-
-
 			
 		}
 		synchro=0;
@@ -420,7 +402,20 @@ int main(int argc, char ** argv)
 	SDL_Rect rect = {0, 0, 1024, 768}; 
 	SDL_RenderFillRect(renderer, &rect);
 
-	if (joueurSel!=-1)
+	if (joueurSel!=-1)//
+	// case 'R':
+	// {
+	// 	int resultat;
+	// 	sscanf(gbuffer, "R %d", &resultat);
+	// 	printf("Réponse du serveur : %d\n", resultat);
+
+	// 	// Popup simple (temporaire)
+	// 	char msg[64];
+	// 	sprintf(msg, "Symbole trouvé %d fois chez les autres", resultat);
+	// 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Réponse", msg, NULL);
+
+	// 	break;
+	// }
 	{
 		SDL_SetRenderDrawColor(renderer, 255, 180, 180, 255);
 		SDL_Rect rect1 = {0, 90+joueurSel*60, 200 , 60}; 

@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 
-
+// Définition de la structure client
 struct _client
 {
         char ipAddress[40];
@@ -21,7 +21,7 @@ struct _client
 int nbClients;
 int fsmServer;
 
-
+// Tableau représentant le paquet de cartes initial
 int deck[13]={0,1,2,3,4,5,6,7,8,9,10,11,12};
 
 int tableCartes[4][8];
@@ -30,20 +30,20 @@ char *nomcartes[]=
   "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
   "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
   "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
-int joueurCourant;
+int joueurCourant;   //joueur dont c'est le tour
 
 
 
-
+//gestion des erreurs
 void error(const char *msg)
 {
     perror(msg);
-    exit(1);
+    exit(1);    //quite le prgm
 }
 
 
 
-
+//melange des cartes du deck
 void melangerDeck()
 {
         int i;
@@ -73,6 +73,7 @@ void createTable()
 		for (j=0;j<8;j++)
 			tableCartes[i][j]=0;
 
+	//parcours des cartes distribuées à chaq joueur
 	for (i=0;i<4;i++)
 	{
 		for (j=0;j<3;j++)
@@ -146,14 +147,14 @@ void createTable()
 
 
 
-
+// Affichage du deck et de la table pour debug
 
 void printDeck()
 {
         int i,j;
 
         for (i=0;i<13;i++)
-                printf("%d %s\n",deck[i],nomcartes[deck[i]]);
+                printf("%d %s\n",deck[i],nomcartes[deck[i]]);   /// Affiche chaque carte et son nom
 
 	for (i=0;i<4;i++)
 	{
@@ -167,7 +168,7 @@ void printDeck()
 
 
 
-
+// Affichage des clients connecté (debug)
 void printClients()
 {
         int i;
@@ -182,7 +183,7 @@ void printClients()
 
 
 
-
+//trouver un client par son nom
 int findClientByName(char *name)
 {
         int i;
@@ -199,7 +200,7 @@ int findClientByName(char *name)
 
 
 
-
+// Envoie un message TCP à un client donné
 void sendMessageToClient(char *clientip,int clientport,char *mess)
 {
     int sockfd, portno, n;
@@ -235,7 +236,7 @@ void sendMessageToClient(char *clientip,int clientport,char *mess)
 
 
 
-
+//message broadcast à tous les client connectes
 void broadcastMessage(char *mess)
 {
         int i;
@@ -253,7 +254,7 @@ void broadcastMessage(char *mess)
 
 
 
-
+// main principal
 int main(int argc, char *argv[])
 {
      int sockfd, newsockfd, portno;
@@ -275,7 +276,7 @@ int main(int argc, char *argv[])
          exit(1);
      }
 
-	 srand(time(NULL));  //////
+	 srand(time(NULL));  ////// pour melanger les joueurs à chaque partie
 
      sockfd = socket(AF_INET, SOCK_STREAM, 0);
      if (sockfd < 0) 
@@ -297,7 +298,7 @@ int main(int argc, char *argv[])
      listen(sockfd,5);
      clilen = sizeof(cli_addr);
 
-	 
+	//initialisation du jeu
 	srand(time(NULL));
 	printDeck();
 
@@ -305,7 +306,7 @@ int main(int argc, char *argv[])
 	createTable();
 	printDeck();
 	joueurCourant=0;
-	//fsmServer = 0;
+	
 
 
 	for (i=0;i<4;i++)
@@ -316,7 +317,7 @@ int main(int argc, char *argv[])
 	}
 
 
-
+	// Boucle principale d'acceptation de connexions et de traitement
      while (1)
      {    
      	newsockfd = accept(sockfd, 
@@ -333,7 +334,7 @@ int main(int argc, char *argv[])
         printf("Received packet from %s:%d\nData: [%s]\n\n",
                 inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
-        if (fsmServer==0)
+        if (fsmServer==0)   //phase de connexion
         {
         	switch (buffer[0])
         	{
@@ -370,7 +371,7 @@ int main(int argc, char *argv[])
 
 				// Si le nombre de joueurs atteint 4, alors on peut lancer le jeu
 				if (nbClients==4)
-				{
+				{	// Envoi des cartes et tableCartes à chaque joueur:::
 					
 					
 					// On envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
