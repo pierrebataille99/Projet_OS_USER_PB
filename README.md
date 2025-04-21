@@ -1,5 +1,7 @@
 # Projet_OS_USER_PB
 
+!!!!!   Jeu à compiler et executer sur linux evidemment !!!!!  :)
+
 
 Pour compiler et executer le jeu, vous devez suivre les étapes suivantes:
 
@@ -8,16 +10,22 @@ Il faut ensuite compiler les programmes en c pour créer des éxecutables:
 
 __Compilation:__
 
-Par exemple, pour compiler le server.c, j'ai utilisé la commande suivante:
+
+
+Pour compiler directement et créer les executables en 2 commandes avec le "makefile: cmd.sh", il faut utiliser les commandes suivantes:
+
+chmod +x cmd.sh
+./cmd.sh
+
+Ou bien si on veut se compliquer la vie, on peut compiler les 2 programmes un par un:
+Par exemple, pour compiler le server.c:
 
 gcc server.c -o server
 
 
 
 
-
-
-Par exemple, pour compiler le server.c, j'ai utilisé la commande suivante:
+Par exemple, pour compiler le server.c:
 
 gcc -o sh13 sh13.c `sdl2-config --cflags --libs` -lSDL2_image -lSDL2_ttf -lpthrea
 

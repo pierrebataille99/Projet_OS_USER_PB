@@ -37,6 +37,11 @@ char *nbnoms[]={"Sebastian Moran", "irene Adler", "inspector Lestrade",
 
 volatile int synchro;
 
+
+
+// thread TCP qui tourne en parallèle : il écoute sur le port client pour recevoir des messages du serveur
+// à chaque message reçu, il le met dans gbuffer et déclenche synchro = 1 pour que le main loop le traite
+
 void *fn_serveur_tcp(void *arg)
 {
         int sockfd, newsockfd, portno;
@@ -89,6 +94,12 @@ void *fn_serveur_tcp(void *arg)
      }
 }
 
+
+
+
+// envoie un message au serveur via une connexion TCP classique
+// utilisé pour envoyer nos actions : connexion, questions, accusations, etc.
+
 void sendMessageToServer(char *ipAddress, int portno, char *mess)
 {
     int sockfd, n;
@@ -120,6 +131,26 @@ void sendMessageToServer(char *ipAddress, int portno, char *mess)
 
     close(sockfd);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////main ///////////////////////////////////////////////////////
+// fonction principale du programme client SDL
+// initialise SDL + TTF, charge les images, crée la fenêtre, et lance le thread TCP
+// ensuite gère les clics souris pour faire des actions (poser une question, accuser...)
+// affiche la grille de jeu, les nom, les objets, les cartes, etc.
 
 int main(int argc, char ** argv)
 {
@@ -155,7 +186,7 @@ int main(int argc, char ** argv)
 
     SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
 
-	deck[0] = IMG_Load("SH13_0.png");
+	deck[0] = IMG_Load("SH13_0.png");   //images
 	deck[1] = IMG_Load("SH13_1.png");
 	deck[2] = IMG_Load("SH13_2.png");
 	deck[3] = IMG_Load("SH13_3.png");
@@ -169,7 +200,7 @@ int main(int argc, char ** argv)
 	deck[11] = IMG_Load("SH13_11.png");
 	deck[12] = IMG_Load("SH13_12.png");
 
-	objet[0] = IMG_Load("SH13_pipe_120x120.png");
+	objet[0] = IMG_Load("SH13_pipe_120x120.png");   //images
 	objet[1] = IMG_Load("SH13_ampoule_120x120.png");
 	objet[2] = IMG_Load("SH13_poing_120x120.png");
 	objet[3] = IMG_Load("SH13_couronne_120x120.png");
@@ -222,6 +253,10 @@ int main(int argc, char ** argv)
    synchro=0;
    ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
 
+
+	// boucle principale du programme SDL : tourne tant que l’utilisateur n’a pas quitté
+	// ici on gère les événements clavier/souris avec SDL_PollEvent (clics, mouvements, fermeture...)
+
     while (!quit)
     {
 	if (SDL_PollEvent(&event))
@@ -272,24 +307,46 @@ int main(int argc, char ** argv)
 					if (guiltSel!=-1)
 					{
 						sprintf(sendBuffer,"G %d %d",gId, guiltSel);
+						// Cas G : accusation directe d’un personnage comme étant le coupable
+						// Le joueur envoie un message "G <id joueur> <indice de la carte accusée>" au serveur
+
 
 					// RAJOUTER DU CODE ICI 
 					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					}
+
+
+
+
+
+
 					else if ((objetSel!=-1) && (joueurSel==-1))
 					{
 						sprintf(sendBuffer,"O %d %d",gId, objetSel);
+						// Cas O : question ouverte sur un symbole (objet), adressée à tous les autres joueurs
+						// Le joueur envoie un message "O <id joueur> <indice du symbole>" au serveur
+
 
 					// RAJOUTER DU CODE ICI
 					printf("%s\n", sendBuffer);
 					sendMessageToServer(gServerIpAddress,gServerPort,sendBuffer);
 
 					}
+
+
+
+
+
+
+
 					else if ((objetSel!=-1) && (joueurSel!=-1))
 					{
 						sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
+						// Cas S : question ciblée sur un symbole, adressée à un joueur spécifique
+						// Le joueur envoie un message "S <id joueur> <id joueur cible> <indice du symbole>" au serveur
+
 
 					// RAJOUTER DU CODE ICI
 					printf("%s\n", sendBuffer);
@@ -317,25 +374,55 @@ int main(int argc, char ** argv)
 		{
 			// Message 'I' : le joueur recoit son Id
 			case 'I':
+				
+				// Message 'I' : le serveur informe le client de son identifiant unique (gId)
+				// Ce message est envoyé juste après la connexion pour identifier chaque joueur
+
 				// RAJOUTER DU CODE ICI
 				sscanf(gbuffer, "I %d", &gId);
 
 				break;
+
+
+
+
+
 			// Message 'L' : le joueur recoit la liste des joueurs
 			case 'L':
+
+				// Message 'L' : le serveur envoie la liste complète des noms des 4 joueurs connectés
+				// On met à jour le tableau local gNames[] avec les noms reçus
+
 				// RAJOUTER DU CODE ICI
 				sscanf(gbuffer, "L %s %s %s %s", gNames[0], gNames[1], gNames[2], gNames[3]);
 
 				break;
+
+
+
+
+
 			// Message 'D' : le joueur recoit ses trois cartes
 			case 'D':
+				// Message 'D' : le serveur envoie les 3 cartes que possède ce joueur
+				// On enregistre ces cartes dans le tableau b[]
+
 				// RAJOUTER DU CODE ICI
 				sscanf(gbuffer, "D %d %d %d", &b[0], &b[1], &b[2]);
 
 				break;
+
+
+
+
+
 			// Message 'M' : le joueur recoit le n° du joueur courant
 			// Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
 			case 'M':
+
+				// Message 'M' : le serveur indique quel joueur est actif (joueur courant)
+				// Si c'est notre tour (gId == joueur), on active le bouton "Go" pour autoriser une action
+
 				// RAJOUTER DU CODE ICI
 				{
 					int joueur;
@@ -344,8 +431,19 @@ int main(int argc, char ** argv)
 				}
 
 				break;
-			// Message 'V' : le joueur recoit une valeur de tableCartes
+			
+			
+			
+			
+			
+			
+				// Message 'V' : le joueur recoit une valeur de tableCartes
 			case 'V':
+				
+				// Message 'V' : le serveur envoie une valeur liée à un symbole possédé (ou non) par un joueur
+				// On met à jour la grille tableCartes pour le joueur et le symbole donné
+				// Si la valeur reçue est 100 (valeur spéciale de type "étoile"), on la stocke uniquement si vide
+
 				// RAJOUTER DU CODE ICI
 				{
 					int row = 0, col = 0, n = -1;
@@ -357,6 +455,12 @@ int main(int argc, char ** argv)
 				}
 
 				break;
+
+			
+			//fonctionnalité supplémentaire du jeu, pour afficher une fenetre popoup
+			// Message 'W' : le serveur annonce la victoire du joueur qui a trouvé le coupable
+			// On affiche une boîte de dialogue SDL pour annoncer le gagnant
+			// Puis on désactive le bouton "Go" pour bloquer les actions
 
 			case 'W':
 				{
@@ -380,7 +484,7 @@ int main(int argc, char ** argv)
 						NULL
 					);
 
-					//bouton du jeu desactivé si coupable trouvé
+					//bouton go du jeu desactivé si coupable trouvé
 					goEnabled = 0;
 					break;
 				}
